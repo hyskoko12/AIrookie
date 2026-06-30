@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사고를 되감다: AI 기반 교통사고 재현 시스템</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="sim-header">
+    <a href="index.html" class="back-btn">&#8592; 돌아가기</a>
+    <div class="logo">
+      <span class="logo-icon">&#9680;</span>
+      <span class="logo-text">사고를 되감다<span class="accent">:</span></span>
+    </div>
+    <span style="color: var(--text2); font-size: 0.85rem;">분석 완료 &mdash; 2026-06-30</span>
+  </header>
+
+  <div class="sim-layout">
+
+    <!-- 캔버스 영역 -->
+    <div class="sim-canvas-area">
+      <div class="sim-canvas-wrap">
+        <canvas id="simCanvas"></canvas>
+      </div>
+
+      <div class="sim-controls">
+        <button class="ctrl-btn" id="rewindBtn" title="처음으로">&#9646;&#9664;</button>
+        <button class="ctrl-btn active" id="playBtn" title="재생/일시정지">&#9654;</button>
+
+        <div class="timeline">
+          <input type="range" class="timeline-bar" id="timelineBar" min="0" max="100" value="0" />
+          <div class="timeline-labels">
+            <span id="curTime">0.0s</span>
+            <span id="totalTime">7.0s</span>
+          </div>
+        </div>
+
+        <select class="speed-select" id="speedSelect">
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 사이드 패널 -->
+    <aside class="sim-panel">
+
+      <div class="panel-section">
+        <p class="panel-title">차량 정보</p>
+
+        <div class="vehicle-card car-a">
+          <span class="vehicle-label">&#9632; 차량 A (블랙박스 차량)</span>
+          <div class="vehicle-stats">
+            <div class="stat">
+              <span class="stat-key">현재 속도</span>
+              <span class="stat-val" id="speedA">0 km/h</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">충돌 전 속도</span>
+              <span class="stat-val">42 km/h</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">진행 방향</span>
+              <span class="stat-val">직진</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">차선</span>
+              <span class="stat-val">1차선</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vehicle-card car-b">
+          <span class="vehicle-label">&#9632; 차량 B (상대 차량)</span>
+          <div class="vehicle-stats">
+            <div class="stat">
+              <span class="stat-key">현재 속도</span>
+              <span class="stat-val" id="speedB">0 km/h</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">충돌 전 속도</span>
+              <span class="stat-val">31 km/h</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">진행 방향</span>
+              <span class="stat-val">좌회전</span>
+            </div>
+            <div class="stat">
+              <span class="stat-key">신호</span>
+              <span class="stat-val" style="color: #ef4444;">적신호 위반</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <p class="panel-title">주요 이벤트</p>
+        <div class="event-list">
+          <div class="event-item">
+            <div class="event-dot"></div>
+            <div>
+              <div class="event-time">0.0s</div>
+              <div>영상 시작, 차량 A 직진 중</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot warn"></div>
+            <div>
+              <div class="event-time">2.5s</div>
+              <div>차량 B 교차로 진입 감지</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot warn"></div>
+            <div>
+              <div class="event-time">4.1s</div>
+              <div>차량 A 브레이크 작동 시작</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot danger"></div>
+            <div>
+              <div class="event-time">5.3s</div>
+              <div>충돌 발생 &mdash; 우측 전방</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot"></div>
+            <div>
+              <div class="event-time">7.0s</div>
+              <div>차량 정지</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </aside>
+  </div>
+
+  <script src="simulation.js"></script>
+</body>
+</html>
