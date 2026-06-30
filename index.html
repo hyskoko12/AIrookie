@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사고를 되감다: AI 기반 교통사고 재현 시스템</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">&#9680;</span>
+      <span class="logo-text">사고를 되감다<span class="accent">:</span></span>
+    </div>
+    <nav>
+      <a href="#">소개</a>
+      <a href="#">사용방법</a>
+      <a href="#">문의</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>블랙박스 영상으로<br /><span class="accent">사고를 재현</span>합니다</h1>
+      <p class="subtitle">AI가 영상을 분석해 2D 탑뷰 시뮬레이션으로 사고 상황을 시각화합니다</p>
+    </section>
+
+    <section class="upload-section">
+      <div class="upload-card" id="uploadCard">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">&#127910;</div>
+          <p class="upload-title">영상을 드래그하여 업로드</p>
+          <p class="upload-sub">또는 클릭하여 파일 선택</p>
+          <p class="upload-format">지원 형식: MP4, AVI, MOV, MKV (최대 500MB)</p>
+          <input type="file" id="fileInput" accept="video/*" hidden />
+        </div>
+
+        <div class="file-preview" id="filePreview" style="display:none;">
+          <div class="file-info">
+            <span class="file-icon">&#127910;</span>
+            <div>
+              <p class="file-name" id="fileName"></p>
+              <p class="file-size" id="fileSize"></p>
+            </div>
+            <button class="remove-btn" id="removeBtn">&#10005;</button>
+          </div>
+          <video id="videoPreview" class="video-preview" controls></video>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label class="option-label">
+          <input type="checkbox" checked /> 차량 속도 추정
+        </label>
+        <label class="option-label">
+          <input type="checkbox" checked /> 충돌 지점 표시
+        </label>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>
+        <span id="btnText">영상을 먼저 업로드해주세요</span>
+      </button>
+    </section>
+
+    <section class="loading-section" id="loadingSection" style="display:none;">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <h2>AI가 영상을 분석하고 있습니다</h2>
+        <p id="loadingStep">영상 프레임 추출 중...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">0%</p>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">&#128250;</div>
+        <h3>영상 분석</h3>
+        <p>AI가 프레임별로 차량 위치와 속도를 추적합니다</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128204;</div>
+        <h3>2D 탑뷰 재현</h3>
+        <p>사고 순간을 위에서 바라보는 시각으로 재현합니다</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>사고를 되감다: AI 기반 교통사고 재현 시스템</p>
+  </footer>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const videoPreview = document.getElementById('videoPreview');
+    const removeBtn = document.getElementById('removeBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const btnText = document.getElementById('btnText');
+    const loadingSection = document.getElementById('loadingSection');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('drag-over');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('drag-over');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('video/')) loadFile(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) loadFile(fileInput.files[0]);
+    });
+
+    function loadFile(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+      videoPreview.src = URL.createObjectURL(file);
+      uploadArea.style.display = 'none';
+      filePreview.style.display = 'block';
+      analyzeBtn.disabled = false;
+      btnText.textContent = 'AI 분석 시작';
+      analyzeBtn.classList.add('ready');
+    }
+
+    removeBtn.addEventListener('click', () => {
+      uploadArea.style.display = 'flex';
+      filePreview.style.display = 'none';
+      videoPreview.src = '';
+      fileInput.value = '';
+      analyzeBtn.disabled = true;
+      btnText.textContent = '영상을 먼저 업로드해주세요';
+      analyzeBtn.classList.remove('ready');
+    });
+
+    analyzeBtn.addEventListener('click', () => {
+      if (analyzeBtn.disabled) return;
+      loadingSection.style.display = 'flex';
+      loadingSection.scrollIntoView({ behavior: 'smooth' });
+      simulateProgress();
+    });
+
+    const steps = [
+      '영상 프레임 추출 중...',
+      '차량 객체 감지 중...',
+      '이동 경로 추적 중...',
+      '충돌 지점 분석 중...',
+      '2D 시뮬레이션 생성 중...',
+    ];
+
+    function simulateProgress() {
+      const fill = document.getElementById('progressFill');
+      const text = document.getElementById('progressText');
+      const step = document.getElementById('loadingStep');
+      let progress = 0;
+
+      const interval = setInterval(() => {
+        progress += 1;
+        fill.style.width = progress + '%';
+        text.textContent = progress + '%';
+        step.textContent = steps[Math.floor(progress / 20)] || steps[4];
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            window.location.href = 'simulation.html';
+          }, 500);
+        }
+      }, 40);
+    }
+  </script>
+</body>
+</html>
