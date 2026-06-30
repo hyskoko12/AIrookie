@@ -12,8 +12,8 @@ resizeCanvas();
 window.addEventListener('resize', () => { resizeCanvas(); draw(); });
 
 // ─── 시뮬레이션 설정 ───
-const TOTAL_TIME = 7.0;   // 총 시간 (초)
-const COLLISION_T = 5.3;  // 충돌 시점
+const TOTAL_TIME = 10.0;  // 총 시간 (초)
+const COLLISION_T = 7.6;  // 충돌 시점
 
 let currentTime = 0;
 let playing = true;
@@ -26,7 +26,7 @@ function getCarA(t) {
   // 차량 A: 위에서 아래로 직진 (1차선)
   const startY = 0.1;
   const endY = 0.85;
-  const brakeStart = 4.1;
+  const brakeStart = 5.9;
   let y;
 
   if (t < brakeStart) {
@@ -44,11 +44,11 @@ function getCarA(t) {
 
 function getCarB(t) {
   // 차량 B: 왼쪽에서 오른쪽으로 이동 후 좌회전 시도
-  if (t < 2.5) {
+  if (t < 3.6) {
     return { x: -0.05, y: 0.52, angle: 0, kmh: 0 };
   }
-  const et = t - 2.5;
-  const duration = COLLISION_T - 2.5;
+  const et = t - 3.6;
+  const duration = COLLISION_T - 3.6;
   const progress = Math.min(et / duration, 1);
   // 왼쪽에서 교차로 중심으로 이동
   const x = 0.05 + progress * 0.38;
